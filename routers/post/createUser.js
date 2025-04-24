@@ -2,39 +2,45 @@ import User from '../../schema/regstur.js';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 
-const CreatUser =()=>{
-const app = express();
-app.use(express.json());
+const CreatUser = () => {
+  const app = express();
+  app.use(express.json());
 
-
-app.post('/signup', async (req, res) => {
+  app.post('/signup', async (req, res) => {
     try {
-        const { names, password, code } = req.body;
+      // استلام البيانات من body
+      const { fullName, password, code, phone, confirmPassword } = req.body;
 
-        if (!names || !password || !code) {
-            return res.status(400).json({ message: "جميع الحقول مطلوبة." });
-        }
+      if (!fullName || !password || !code || !phone || !confirmPassword) {
+        return res.status(400).json({ message: "جميع الحقول مطلوبة." });
+      }
 
-        const existingUser = await User.findOne({ $or: [{ names }, { code }] });
+      // التحقق من أن كلمة السر وتأكيد كلمة السر متطابقين
+      if (password !== confirmPassword) {
+        return res.status(400).json({ message: "كلمة السر غير متطابقة." });
+      }
 
-        if (existingUser) {
-            return res.status(409).json({ message: "البريد الإلكتروني أو الرمز مستخدم مسبقًا." });
-        }
+      // التحقق إذا كان المستخدم موجود مسبقًا
+      const existingUser = await User.findOne({ $or: [{ code }] });
 
-        // لتشفير الباسورد
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
+      if (existingUser) {
+        return res.status(409).json({ message: "البريد الإلكتروني أو الرمز مستخدم مسبقًا." });
+      }
 
-        const newUser = await User.create({ names, password: hashedPassword, code });
-        return res.status(201).json({ message: "تم إنشاء الحساب بنجاح", user: newUser });
+      // تشفير كلمة السر
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    }catch(err){
-    res.status(500).json({error: err});
+      // إنشاء المستخدم الجديد
+      const newUser = await User.create({ names : fullName, password: hashedPassword, code, phone });
+      
+      return res.status(201).json({ message: "تم إنشاء الحساب بنجاح" });
+    } catch (err) {
+      return res.status(500).json({ error: err.message });
     }
-}
-)
-return app ;
+  });
 
-}
+  return app;
+};
 
 export default CreatUser;
