@@ -16,7 +16,7 @@ const port = 5000;
 app.use(express.json());
 
 const corsOptions= {
-    origin : "https://my-attendance-app.vercel.app",
+    origin : "http://localhost:3000",
     optionsSuccessStatus: 200,
 }
 app.use((req, res, next) => {
