@@ -15,13 +15,16 @@ router_IsUserPresentToday.get('/', async (req, res) => {
             checkIn: { $gte: startOfDay, $lt: endOfDay }
         }).populate('user', 'names');
 
-        const usersWithAttendance = records.map(record => ({
-            userId: record.user._id,
-            userName: record.user.names,
-            status: record.status
-        }));
-       
-        return res.status(200).json({ usersWithAttendance });
+        // تصفية السجلات التي تحتوي على user: null
+        const usersWithAttendance = records
+            .filter(record => record.user) // تجاهل السجلات غير الصالحة
+            .map(record => ({
+                userId: record.user._id,
+                userName: record.user.names,
+                status: record.status
+            }));
+
+            return res.status(200).json({ usersWithAttendance: usersWithAttendance });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ message: "حدث خطأ أثناء جلب حالة الحضور" });
