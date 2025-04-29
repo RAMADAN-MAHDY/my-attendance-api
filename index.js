@@ -14,7 +14,7 @@ import router_IsUserPresentToday from './routers/get/isUserPresentToday.js';
 const app = express();
 const port = 5000;
 app.use(express.json());
-
+// https://my-attendance-app.vercel.app
 const corsOptions= {
     origin : "https://my-attendance-app.vercel.app",
     optionsSuccessStatus: 200,
